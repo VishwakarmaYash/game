@@ -5,56 +5,192 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Guess</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    
+    <style>
+        body {
+            background: linear-gradient(to bottom, blue, white);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
+        h1, h5 {
+            font-family: 'Georgia', serif;
+        }
+
+        .card {
+            background-color: #f8f9fa; /* Light background color for the card */
+            border: 2px solid #007bff; /* Blue border */
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            /* Add pop-up animation */
+            animation: popUpAnimation 0.6s ease-out;
+        }
+
+        /* Pop-up animation */
+        @keyframes popUpAnimation {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Hover effect */
+        .card:hover {
+            animation: cardHoverAnimation 0.5s forwards;
+        }
+
+        /* Keyframes for hover animation */
+        @keyframes cardHoverAnimation {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+            100% {
+                transform: scale(1.05);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .alert {
+            border-radius: 5px;
+        }
+
+        /* Music controls */
+        #music-controls {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+        }
+
+        /* Card header and footer styling */
+        .card-header, .card-footer {
+            background-color: #007bff; /* Blue background for header/footer */
+            color: white;
+            padding: 10px;
+        }
+
+        .card-header h5, .card-footer p {
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
 
     <div class="container text-center">
         <div class="alert alert-primary" role="alert">
-            <h1>Random Guess </h1>
-          </div>
-          <div class="d-flex justify-content-center">
-              <div class="card" style="width: 18rem;">
-                <div class="card-body">
-                  <h5 class="card-title">Input Your Number between 1 to 100</h5>
-                   <input type="number" id="user-input" class="form-control">
-                  <button class="btn btn-primary mt-2" id="submit" onclick="guess_num()">Submit Guess</button>
-                </div>
-                <div id = "result"></div>
-              </div>
-
-            </div>
-          
-
+            <h1>Random Guess</h1>
         </div>
+        <div class="d-flex justify-content-center">
+            <div class="card" style="width: 18rem;">
+                <div class="card-header">
+                    <h5 class="card-title">Input Your Number between 1 to 100</h5>
+                </div>
+                <div class="card-body">
+                    <input type="number" id="user-input" class="form-control mb-2">
+                    <button class="btn btn-primary" id="submit" onclick="guess_num()">Submit Guess</button>
+                </div>
+                <div id="result" class="mt-3"></div>
+                <div class="card-footer">
+                    <p>Guess the number and see if you get it right!</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <script>
-            let randomnumber = Math.floor(Math.random()*101)
-            function guess_num(){
-            let result = document.getElementById('result')
-            let submit = document.getElementById('submit')
-            const guess = Number(document.getElementById('user-input').value)
-                          console.log(guess)
-           if(guess === randomnumber){
-            result.textContent = 'Success'
-            result.className='alert alert-success'
-            submit.disabled = true
-            console.log('Success')
-           }
-           else if (guess < randomnumber){
-            result.textContent = 'Small'
-             result.className='alert alert-danger'
-            console.log('Small')
-           }
-           else{
-             result.textContent = 'Large'
-            result.className='alert alert-danger'
-            console.log('Large')
-           }
-           
-            // console.log(randomnumber)
+    <!-- Audio elements -->
+    <audio id="background-music" src="background-music.mp3" loop></audio>
+    <audio id="click-sound" src="click-sound.mp3"></audio>
+    <audio id="success-sound" src="success-sound.mp3"></audio>
+
+    <!-- Music Controls -->
+    <div id="music-controls">
+        <button onclick="toggleMusic()">Play/Pause Music</button>
+        <input type="range" id="volume-control" min="0" max="1" step="0.1" value="0.5" onchange="adjustVolume(this.value)">
+    </div>
+
+    <script>
+        // Get audio elements
+        const backgroundMusic = document.getElementById('background-music');
+        const clickSound = document.getElementById('click-sound');
+        const successSound = document.getElementById('success-sound');
+
+        // Function to play sound
+        function playSound(sound) {
+            sound.currentTime = 0; // Rewind to the start
+            sound.play();
         }
-        </script>
+
+        // Function to toggle background music
+        function toggleMusic() {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+            } else {
+                backgroundMusic.pause();
+            }
+        }
+
+        // Function to adjust volume
+        function adjustVolume(value) {
+            backgroundMusic.volume = value;
+        }
+
+        let randomnumber = Math.floor(Math.random() * 101);
+
+        function guess_num() {
+            // Play click sound
+            playSound(clickSound);
+
+            let result = document.getElementById('result');
+            let submit = document.getElementById('submit');
+            const guess = Number(document.getElementById('user-input').value);
+
+            if (guess === randomnumber) {
+                result.textContent = 'Success';
+                result.className = 'alert alert-success';
+                submit.disabled = true;
+                // Play success sound
+                playSound(successSound);
+            }
+            else if (guess < randomnumber) {
+                result.textContent = 'Small';
+                result.className = 'alert alert-danger';
+            }
+            else {
+                result.textContent = 'Large';
+                result.className = 'alert alert-danger';
+            }
+        }
+
+        // Start background music automatically
+        document.addEventListener('DOMContentLoaded', () => {
+            backgroundMusic.play();
+        });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
